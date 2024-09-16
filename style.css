@@ -4,6 +4,30 @@ body {
     max-width: 600px;
     margin: auto;
     background-color:rgb(104, 210, 245); /* Change the background color */
+    text-align: center;
+}
+
+h1 {
+    /* Center-aligns text within the to-do list */
+    text-align: center;
+    /* Sets the text color to white */
+    color: white;
+    /* Sets the font type to Arial (default is sans-serif) */
+    font-family: 'Courier New', Courier, monospace;
+    /* Sets the font size to 20 pixels */
+    font-size: 30px;
+    /* Makes the text appear bold */
+    font-weight: bold;
+    /* Adds 20 pixels of padding on all sides */
+    padding: 20px;
+    /* Adds 10 pixels of margin on all sides */
+    margin: 10px;
+    /* Adds a solid border with 2 pixels thickness and white color */
+    border: 2px solid white;
+    /* Rounds the corners of the border with a radius of 10 pixels */
+    border-radius: 10px;
+    /* Sets the maximum width to 500 pixels */
+    max-width: 500px;
 }
 
 #todo-list {
@@ -29,6 +53,8 @@ body {
     border-radius: 10px;
     /* Sets the maximum width to 500 pixels */
     max-width: 500px;
+
+    list-style-type: none;
 }
 
 #todo-list:hover {
@@ -36,14 +62,9 @@ body {
     color: coral;
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-    font-family: 'Courier New', Courier, monospace;
-}
 
 li {
-    background: #e4e4e4;
+    background: darkgrey;
     margin: 5px 0;
     padding: 10px;
     border-radius: 5px; /* Change the border-radius */
