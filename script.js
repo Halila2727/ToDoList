@@ -1,14 +1,14 @@
 document.getElementById('add-btn').addEventListener('click', function() {
-    const newTodo = document.getElementById('new-todo').value;
-    if (newTodo.trim() === '') return;
+  const newTodo = document.getElementById('new-todo').value;
+  if (newTodo.trim() === '') return;
 
-    const li = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
+  const li = document.createElement('li');
+  li.textContent = newTodo;
 
-    li.appendChild(checkbox);
-    li.appendChild(document.createTextNode(newTodo));
-
-    document.getElementById('todo-list').appendChild(li);
-    document.getElementById('new-todo').value = '';
+  li.addEventListener('click', function() {
+    document.getElementById('todo-list').removeChild(li);
   });
+
+  document.getElementById('todo-list').appendChild(li);
+  document.getElementById('new-todo').value = '';
+});

@@ -35,8 +35,6 @@ h1 {
     text-align: center;
     /* Sets the background color to sky blue */
     background-color: skyblue;
-    /* Sets the text color to white */
-    color: white;
     /* Sets the font type to Arial (default is sans-serif) */
     font-family: 'Courier New', Courier, monospace;
     /* Sets the font size to 20 pixels */
@@ -57,15 +55,17 @@ h1 {
     list-style-type: none;
 }
 
-#todo-list:hover {
-    /* Changes the text color to coral when you hover over the list */
-    color: coral;
+li:hover {
+    /* Changes the text color and background color when you hover over the list */
+    background-color: gainsboro;
+    color: crimson;
 }
 
 
 li {
-    background: darkgrey;
+    background-color: white;
     margin: 5px 0;
     padding: 10px;
+    border: 2px solid gray;
     border-radius: 5px; /* Change the border-radius */
 }
