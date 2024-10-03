@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 let todos = [];
 
 app.get('/todos', (req, res) => {
-    res.send(todos);
+    res.json(todos);
 });
 
 app.post('/todos', (req, res) => {
@@ -18,7 +18,7 @@ app.post('/todos', (req, res) => {
         done: req.body.done
     };
     todos.push(newTodo);
-    res.send(newTodo);
+    res.json(newTodo);
 });
 
 module.exports = app;
