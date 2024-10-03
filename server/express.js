@@ -1,6 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
+
+mongoose.connect('mongodb://127.0.0.1:27017/', { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
