@@ -1,12 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 
 const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: 'http://localhost:3000' }));
-
-const mongoose = require('mongoose');
 
 mongoose.connect('mongodb://127.0.0.1:27017/todoapp', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
@@ -18,6 +17,11 @@ const TodoSchema = new mongoose.Schema({
 });
 const Todo = mongoose.model('Todo', TodoSchema);
 
+app.use((req, res, next) => {
+    console.log(`Received request: ${req.method} ${req.url}`);
+    next();
+});
+
 //CRUD operations
 app.post('/todos', async (req, res) => { //create
     try {
@@ -26,9 +30,9 @@ app.post('/todos', async (req, res) => { //create
             completed: req.body.completed
         });
         const savedTodo = await newTodo.save();
-        res.status(201).json(savedTodo);
+        res.json(savedTodo);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -44,9 +48,9 @@ app.get('/todos', async (req, res) => { //retrieve
 app.put('/todos/:id', async (req, res) => { //update
     try {
         const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).json(updatedTodo);
+        res.json(updatedTodo);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -55,7 +59,7 @@ app.delete('/todos/:id', async (req, res) => { //delete
         await Todo.findByIdAndDelete(req.params.id);
         res.status(204).end();
     } catch (err) {
-        res.status(500).json({ error: err.message});
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -69,3 +73,7 @@ app.patch('/api/todos/:id', async (req, res) => { //update completed
 });
 
 module.exports = app;
+
+app.listen(3000, () => {
+    console.log('Server is running on port 5000');
+});
