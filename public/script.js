@@ -1,125 +1,129 @@
-document.getElementById('add-btn').addEventListener('click', function() {
-    const newTodo = document.getElementById('new-todo').value;
-    if (newTodo.trim() === '') return;
-    
-    const li = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.addEventListener('change', function() {
-        if (checkbox.checked) {
-            li.style.textDecoration = 'line-through';
-        } else {
-            li.style.textDecoration = 'none';
-        }
-        saveTodos();
-    });
-    
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', function() {
-        document.getElementById('todo-list').removeChild(li);
-        saveTodos();
-    });
-
-    const upBtn = document.createElement('button');
-    upBtn.textContent = '^';
-    upBtn.addEventListener('click', function() {
-        move(li, true);
-        saveTodos();
-    });
-
-    const downBtn = document.createElement('button');
-    downBtn.textContent = 'v';
-    downBtn.addEventListener('click', function() {
-        move(li, false);
-        saveTodos();
-    });
-    
-    li.appendChild(checkbox);
-    li.appendChild(document.createTextNode(newTodo));
-    li.appendChild(deleteBtn);
-    li.appendChild(upBtn);
-    li.appendChild(downBtn);
-    
-    // TODO: Add new todo to the top of the list instead of the bottom
-    document.getElementById('todo-list').appendChild(li);
-    document.getElementById('new-todo').value = '';
-    
-    saveTodos();
-});
-
-function move(item, up) {
+document.addEventListener('DOMContentLoaded', () => {
+    const newTodoInput = document.getElementById('new-todo');
+    const addButton = document.getElementById('add-btn');
     const todoList = document.getElementById('todo-list');
-    const index = Array.from(todoList.children).indexOf(item);
 
-    if (up && index > 0) {
-        todoList.insertBefore(item, todoList.children[index - 1]);
-    } else if (!up && index < todoList.children.length - 1) {
-        todoList.insertBefore(item, todoList.children[index + 2]);
+    async function loadTodos() {
+        try {
+            const response = await fetch('http://localhost:3000/todos');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const todos = await response.json();
+            todoList.innerHTML = '';
+            todos.forEach(todo => addTodoToDOM(todo));
+        } catch (error) {
+            console.error('Error fetching todos:', error);
+        }
     }
-}
 
-function saveTodos() {
-    const todos = [];
-    document.querySelectorAll('#todo-list li').forEach(li => {
-        const todoText = li.childNodes[1].nodeValue;
-        const isChecked = li.childNodes[0].checked;
-        todos.push({ text: todoText, checked: isChecked });
-    });
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
+    async function addTodo() {
+        const newTodoText = newTodoInput.value.trim();
+        if (!newTodoText) return;
 
-function loadTodos() {
-    const todos = JSON.parse(localStorage.getItem('todos'));
-    if (todos) {
-        todos.forEach(todo => {
-            const li = document.createElement('li');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = todo.checked;
-            checkbox.addEventListener('change', function() {
-                if (checkbox.checked) {
-                    li.style.textDecoration = 'line-through';
-                } else {
-                    li.style.textDecoration = 'none';
-                }
-                saveTodos();
+        try {
+            const response = await fetch('http://localhost:3000/todos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: newTodoText, completed: false }),
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const todo = await response.json();
+            addTodoToDOM(todo);
+            newTodoInput.value = '';
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        }
+    }
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Delete';
-            deleteBtn.addEventListener('click', function() {
-                document.getElementById('todo-list').removeChild(li);
-                saveTodos();
+    async function deleteTodo(id, li) {
+        try {
+            const response = await fetch(`http://localhost:3000/todos/${id}`, {
+                method: 'DELETE',
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            todoList.removeChild(li);
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+        }
+    }
 
-            const upBtn = document.createElement('button');
-            upBtn.textContent = '^';
-            upBtn.addEventListener('click', function() {
-                move(li, true);
-                saveTodos();
+    async function updateTodoStatus(id, completed) {
+        try {
+            const response = await fetch(`http://localhost:3000/todos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed }),
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error updating todo:', error);
+            throw error;
+        }
+    }
 
-            const downBtn = document.createElement('button');
-            downBtn.textContent = 'v';
-            downBtn.addEventListener('click', function() {
-                move(li, false);
-                saveTodos();
-            });
-            
-            li.appendChild(checkbox);
-            li.appendChild(document.createTextNode(todo.text));
-            li.appendChild(deleteBtn);
-            li.appendChild(upBtn);
-            li.appendChild(downBtn);
-            
-            document.getElementById('todo-list').appendChild(li);
+    function addTodoToDOM(todo) {
+        const li = document.createElement('li');
+        li.dataset.id = todo._id;
 
-            if (todo.checked) {
-                li.style.textDecoration = 'line-through';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.completed;
+        checkbox.addEventListener('change', async () => {
+            try {
+                await updateTodoStatus(todo._id, checkbox.checked);
+                li.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+            } catch (error) {
+                checkbox.checked = !checkbox.checked; // Revert on error
             }
         });
-    }
-}
 
-document.addEventListener('DOMContentLoaded', loadTodos);
+        const textSpan = document.createElement('span');
+        textSpan.textContent = todo.text;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => deleteTodo(todo._id, li));
+
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '↑';
+        upBtn.addEventListener('click', () => moveTodo(li, true));
+
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '↓';
+        downBtn.addEventListener('click', () => moveTodo(li, false));
+
+        li.appendChild(checkbox);
+        li.appendChild(textSpan);
+        li.appendChild(deleteBtn);
+        li.appendChild(upBtn);
+        li.appendChild(downBtn);
+
+        if (todo.completed) {
+            li.style.textDecoration = 'line-through';
+        }
+
+        todoList.appendChild(li);
+    }
+
+    function moveTodo(li, moveUp) {
+        const sibling = moveUp ? li.previousElementSibling : li.nextElementSibling;
+        if (sibling) {
+            moveUp ? todoList.insertBefore(li, sibling) : todoList.insertBefore(sibling, li);
+        }
+        // Note: This doesn't update the order on the server. You'd need to implement that separately.
+    }
+
+    addButton.addEventListener('click', addTodo);
+    newTodoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
+    });
+
+    loadTodos();
+});

@@ -75,5 +75,5 @@ app.patch('/api/todos/:id', async (req, res) => { //update completed
 module.exports = app;
 
 app.listen(3000, () => {
-    console.log('Server is running on port 5000');
+    console.log('Server is running on port 3000');
 });
